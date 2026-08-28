@@ -15,15 +15,12 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-      - name: Build Standalone Production Assets
+      - name: Compile Frontend Dash
         run: |
           pnpm install --no-frozen-lockfile --ignore-scripts
-          pnpm --filter api-server run build
           PORT=3000 BASE_PATH=/ pnpm --filter clause-risk-interceptor run build
-      - name: Save Compiled Distribution to Repository
-        run: |
-          git config --global user.name "SissyJo23"
-          git config --global user.email "sissyjo23@://github.com"
-          git add -f artifacts/api-server/dist artifacts/clause-risk-interceptor/dist
-          git commit -m "Add production compiled assets [skip ci]" || true
-          git push origin main
+      - name: Package Clean Production Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-frontend
+          path: artifacts/clause-risk-interceptor/dist/
