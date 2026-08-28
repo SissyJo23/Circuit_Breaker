@@ -19,7 +19,7 @@ jobs:
         run: |
           pnpm install --no-frozen-lockfile --ignore-scripts
           pnpm --filter api-server run build
-          pnpm --filter clause-risk-interceptor run build
+          PORT=3000 pnpm --filter clause-risk-interceptor run build
       - name: Commit Compiled Files Back to Git
         run: |
           git config --global user.name "SissyJo23"
