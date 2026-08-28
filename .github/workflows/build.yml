@@ -17,13 +17,15 @@ jobs:
           cache: 'pnpm'
       - name: Install and Build Backend
         run: |
+          pnpm config set info-to-ignore-builds false
+          pnpm approve-builds esbuild
           pnpm install --no-frozen-lockfile
           pnpm --filter api-server run build
           pnpm --filter clause-risk-interceptor run build
       - name: Commit Compiled Files Back to Git
         run: |
           git config --global user.name "SissyJo23"
-          git config --global user.email "sissyjo23@://github.com"
-          git add -f artifacts/clause-risk-interceptor/dist lib/api-server/dist node_modules
+          git config --global user.email "sissyjo23@users.noreply.github.com"
+          git add -f artifacts/clause-risk-interceptor/dist lib/api-server/dist
           git commit -m "Cloud compiled production folders added [skip ci]" || true
           git push origin main
