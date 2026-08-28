@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Clause Risk Interceptor"
+description = "A legal clause screening workspace that analyzes pasted or uploaded contract language, returns a 0–100 risk score with an INTERCEPT or ALLOW decision, and preserves an audit trail for every evaluation."
+version = "1.0.0"
+id = "artifacts/clause-risk-interceptor"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20151
+
+[services.development]
+run = "pnpm --filter @workspace/clause-risk-interceptor run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/clause-risk-interceptor", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/clause-risk-interceptor/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20151"
+BASE_PATH = "/"

@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: risk-evaluations
+    description: Clause screening and audit operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,67 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /risk-evaluations:
+    get:
+      operationId: listRiskEvaluations
+      tags: [risk-evaluations]
+      summary: List recent clause evaluations
+      description: Returns the most recent clause screening decisions and their audit metadata.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Recent evaluations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClauseEvaluation"
+    post:
+      operationId: createRiskEvaluation
+      tags: [risk-evaluations]
+      summary: Analyze a contract clause
+      description: Scores a clause from 0 to 100 and applies the fixed INTERCEPT threshold at 80.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClauseEvaluationInput"
+      responses:
+        "201":
+          description: The decision and its audit record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClauseEvaluation"
+        "400":
+          description: Invalid clause input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /risk-evaluations/summary:
+    get:
+      operationId: getRiskEvaluationSummary
+      tags: [risk-evaluations]
+      summary: Get screening summary
+      description: Returns aggregate counts for the screening workspace.
+      responses:
+        "200":
+          description: Screening summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskEvaluationSummary"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +96,121 @@ components:
           type: string
       required:
         - status
+    ClauseEvaluationInput:
+      type: object
+      properties:
+        clauseText:
+          type: string
+          minLength: 10
+          maxLength: 50000
+        sourceName:
+          type: ["string", "null"]
+          maxLength: 255
+      required:
+        - clauseText
+    ClauseEvaluation:
+      type: object
+      properties:
+        id:
+          type: string
+        clauseText:
+          type: string
+        sourceName:
+          type: ["string", "null"]
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        decision:
+          type: string
+          enum: [INTERCEPT, ALLOW]
+        riskLevel:
+          type: string
+          enum: [critical, high, moderate, low]
+        rationale:
+          type: string
+        findings:
+          type: array
+          items:
+            type: string
+        provider:
+          type: string
+        model:
+          type: string
+        analysisVersion:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        audit:
+          $ref: "#/components/schemas/AuditEvent"
+      required:
+        - id
+        - clauseText
+        - sourceName
+        - riskScore
+        - decision
+        - riskLevel
+        - rationale
+        - findings
+        - provider
+        - model
+        - analysisVersion
+        - createdAt
+        - audit
+    AuditEvent:
+      type: object
+      properties:
+        auditId:
+          type: string
+        eventType:
+          type: string
+          enum: [CLAUSE_SCREENED]
+        decision:
+          type: string
+          enum: [INTERCEPT, ALLOW]
+        threshold:
+          type: number
+          enum: [80]
+        recordedAt:
+          type: string
+          format: date-time
+        actor:
+          type: string
+      required:
+        - auditId
+        - eventType
+        - decision
+        - threshold
+        - recordedAt
+        - actor
+    RiskEvaluationSummary:
+      type: object
+      properties:
+        total:
+          type: number
+        intercepted:
+          type: number
+        allowed:
+          type: number
+        averageRiskScore:
+          type: number
+        threshold:
+          type: number
+        lastEvaluatedAt:
+          type: ["string", "null"]
+      required:
+        - total
+        - intercepted
+        - allowed
+        - averageRiskScore
+        - threshold
+        - lastEvaluatedAt
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
 

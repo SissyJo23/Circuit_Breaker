@@ -1,6 +1,6 @@
-# [Project name]
+# Clause Risk Interceptor
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A legal clause screening workspace that returns a 0–100 risk score, applies the fixed INTERCEPT threshold, and preserves an audit record for every evaluation.
 
 ## Run & Operate
 
@@ -22,23 +22,34 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/clause-risk-interceptor` — responsive screening workspace and audit history.
+- `artifacts/api-server/src/routes/risk-evaluations.ts` — screening endpoint, adapter seam, and aggregate summary endpoint.
+- `lib/api-spec/openapi.yaml` — source of truth for screening and audit API contracts.
+- `lib/db/src/schema/risk-evaluations.ts` — evaluation and audit event tables.
+- `artifacts/clause-risk-interceptor/INTEGRATION_HANDOFF.md` — Claude, database, and document-upload handoff notes.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The server, not the model or browser, owns the `riskScore >= 80` decision comparison.
+- Evaluations and audit events are stored separately and created in one database transaction.
+- The preview uses an explicit local analyzer adapter so the UI and audit flow work before a Claude credential is connected.
+- Uploads are intentionally normalized to plain text at the browser/API boundary; document extraction can be swapped in without changing the screening contract.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Screen pasted clauses or `.txt` uploads.
+- Review the current score, decision, rationale, findings, provider metadata, and audit ID.
+- View recent screening history and aggregate totals.
+- Distinguish threshold screening from legal advice with an in-product disclaimer.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The user wants the smallest genuinely usable version first and will connect their own external services later.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- `RISK_ANALYZER_MODE=demo` is the working preview mode. Claude mode intentionally fails until the provider adapter is installed; see `INTEGRATION_HANDOFF.md`.
+- The preview supports `.txt` uploads in this first version; PDF/DOCX extraction belongs in the document pipeline handoff.
 
 ## Pointers
 
