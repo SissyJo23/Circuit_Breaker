@@ -17,9 +17,7 @@ jobs:
           cache: 'pnpm'
       - name: Install and Build Backend
         run: |
-          pnpm config set info-to-ignore-builds false
-          pnpm approve-builds esbuild
-          pnpm install --no-frozen-lockfile
+          pnpm install --no-frozen-lockfile --ignore-scripts
           pnpm --filter api-server run build
           pnpm --filter clause-risk-interceptor run build
       - name: Commit Compiled Files Back to Git
