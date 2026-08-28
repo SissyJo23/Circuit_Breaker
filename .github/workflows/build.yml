@@ -21,11 +21,12 @@ jobs:
           pnpm --filter api-server run build.  
           PORT=3000 BASE_PATH=/ pnpm --filter clause-risk-interceptor run build
 
-           - name: Commit Compiled Files Back to Git
-          run:  
+      - name: Commit Compiled Files Back to Git
+        run: |
           git config --global user.name "SissyJo23"
-          git config --global user.email "sissyjo23@://github.com"
-          git add -f artifacts/clause-risk-interceptor/dist dist
+          git config --global user.email "sissyjo23@users.noreply.github.com"
+          git add -f artifacts/clause-risk-interceptor/dist artifacts/api-server/dist node_modules lib/db/node_modules
           git commit -m "Cloud compiled production folders added [skip ci]" || true
           git push origin main
+
 
